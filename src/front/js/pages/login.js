@@ -1,29 +1,32 @@
 import { Col, Button, Row, Container, Card, Form } from "react-bootstrap";
 import React, { useContext, useState, useEffect } from "react";
 import { Context } from "../store/appContext";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "../../styles/login.css";
 
 import GigHive from "../../img/GigHive.png";
 // import { Signup } from "./signup";
+import {
+  auth,
+  logInWithEmailAndPassword,
+  signInWithGoogle,
+} from "/src/firebase.js";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export function Login() {
   const { store, actions } = useContext(Context);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const history = useNavigate();
-  console.log(username);
-  console.log(password);
-
-  function handleClick(e) {
-    e.preventDefault();
-    actions.login(username, password);
-  }
+  const [user, loading, error] = useAuthState(auth);
+  const navigate = useNavigate();
   useEffect(() => {
-    if (store.token && store.token != "" && store.token != undefined)
-      history("/");
-  }, [store.token, history]);
+    if (loading) {
+      // maybe trigger a loading screen
+      return;
+    }
+    if (user) navigate("/dashboard");
+  }, [user, loading]);
+
 
   return (
     <div>
@@ -39,20 +42,20 @@ export function Login() {
                   </h2>
 
                   <p className=" mb-5 login-white-text">
-                    Please enter your username and password
+                    Please enter your email and password
                   </p>
                   <div className="mb-3 justify-content-center">
                     <Form>
                       <Form.Group className="mb-3" controlId="formBasicEmail ">
                         <Form.Label className="text-center login-gold-text">
-                          Username
+                          Email
                         </Form.Label>
                         <Form.Control
                           id="logose"
                           type="email"
-                          placeholder="Enter username"
-                          value={username}
-                          onChange={(e) => setUsername(e.target.value)}
+                          placeholder="Enter email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
                         />
                       </Form.Group>
 
@@ -85,9 +88,18 @@ export function Login() {
                         <Button
                           className="gold-btn"
                           type="submit"
-                          onClick={handleClick}
+                          onClick={logInWithEmailAndPassword}
                         >
                           Login
+                        </Button>
+                      </div>
+                      <div className="d-grid">
+                        <Button
+                          className="gold-btn"
+                          type="submit"
+                          onClick={signInWithGoogle}
+                        >
+                          Login with Google
                         </Button>
                       </div>
                     </Form>

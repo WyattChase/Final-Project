@@ -1,30 +1,34 @@
 import React, { useContext, useState, useEffect } from "react";
 import { Col, Button, Row, Container, Card, Form } from "react-bootstrap";
 import GigHive from "../../img/GigHive.png";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { Context } from "../store/appContext";
+import {
+  auth,
+  registerWithEmailAndPassword,
+  signInWithGoogle,
+} from "/src/firebase.js";
 import "../../styles/signup.css";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 export const Signup = () => {
   const { store, actions } = useContext(Context);
-  const [first_name, setFirst_name] = useState("");
-  const [last_name, setLast_name] = useState("");
+  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [user, loading, error] = useAuthState(auth);
   const history = useNavigate();
-  console.log(username);
-  console.log(password);
-
-  useEffect(() => {
-    if (store.token && store.token != "" && store.token != undefined)
-      history("/");
-  });
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    actions.registerUser(first_name, last_name, username, email, password);
+  const register = () => {
+    if (!name) alert("Please enter name");
+    registerWithEmailAndPassword(name, email, password);
   };
+  useEffect(() => {
+    if (loading) return;
+    if (user) history.replace("/dashboard");
+  }, [user, loading]);
+
   return (
     <>
       <div>
@@ -44,35 +48,27 @@ export const Signup = () => {
                     </span>
                     <div className="mb-3 justify-content-center">
                       <Form>
-                        <Form.Group className="mb-3 formsi" controlId="formBasicEmail">
+                        <Form.Group
+                          className="mb-3 formsi"
+                          controlId="formBasicEmail"
+                        >
                           <Form.Label className="text-center login-gold-text">
-                            First Name
-                          </Form.Label>
-                          <Form.Control
-                            className="forms"
-                            type="text"
-                            placeholder="Your First Name"
-                            id="firstName"
-                            value={first_name}
-                            onChange={(e) => setFirst_name(e.target.value)}
-                            required
-                          />
-                        </Form.Group>
-                        <Form.Group className="mb-3 formsi" controlId="formBasicEmail">
-                          <Form.Label className="text-center login-gold-text">
-                            Last Name
+                            Name
                           </Form.Label>
                           <Form.Control
                             className="forms"
                             type="text"
                             placeholder="Your Last Name"
                             id="lastName"
-                            value={last_name}
-                            onChange={(e) => setLast_name(e.target.value)}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                             required
                           />
                         </Form.Group>
-                        <Form.Group className="mb-3 formsi " controlId="formBasicEmail">
+                        <Form.Group
+                          className="mb-3 formsi "
+                          controlId="formBasicEmail"
+                        >
                           <Form.Label className="text-center login-gold-text">
                             Username
                           </Form.Label>
@@ -85,7 +81,10 @@ export const Signup = () => {
                             required
                           />
                         </Form.Group>
-                        <Form.Group className="mb-3 formsi" controlId="formBasicEmail">
+                        <Form.Group
+                          className="mb-3 formsi"
+                          controlId="formBasicEmail"
+                        >
                           <Form.Label className="text-center login-gold-text">
                             Email
                           </Form.Label>
@@ -119,9 +118,18 @@ export const Signup = () => {
                           <Button
                             className="gold-btn signs"
                             type="submit"
-                            onClick={(e) => handleSubmit(e)}
+                            onClick={registerWithEmailAndPassword}
                           >
                             Sign Up
+                          </Button>
+                        </div>
+                        <div className="signup-white-text justify-content-center align-items-center">
+                          <Button
+                            className="gold-btn signs"
+                            type="submit"
+                            onClick={signInWithGoogle}
+                          >
+                            Sign Up with Google
                           </Button>
                         </div>
                       </Form>
